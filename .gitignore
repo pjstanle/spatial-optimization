@@ -1,0 +1,7 @@
+slurm*
+*.png
+figs/*
+log/*
+__pycache__/*
+*.out
+full_farm/*
