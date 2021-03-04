@@ -45,7 +45,7 @@ class GeneticAlgorithm():
         """initialize the population with only a limited number of ones. Use this if having a full random initialization
         would violate constraints most of the time"""
 
-        n_ones = 5
+        n_ones = 1
 
         self.parent_population = np.zeros((self.population_size,self.nbits),dtype=int)
         for i in range(self.population_size):
@@ -75,7 +75,7 @@ class GeneticAlgorithm():
                 self.design_variables[i] = self.bounds[i][0] + binary_value
 
     
-    def optimize_ga(self,initialize="random",crossover="random",print_progress=True,save_progress=False):
+    def optimize_ga(self,initialize="random",initialize_custom=False,crossover="random",print_progress=True,save_progress=False):
         """run the genetic algorithm"""
 
         # print("determine the number of design variables and initialize")
@@ -105,11 +105,12 @@ class GeneticAlgorithm():
             self.initialize_population()
         elif initialize == "limit":
             self.initialize_limited()
+        elif initialize == "custom":
+            initialize_custom(self)
 
         # print("initialize the fitness arrays")
         self.parent_fitness = np.zeros(self.population_size)
         self.offspring_fitness = np.zeros(self.population_size)
-
         # print("initialize fitness of the parent population")
         for i in range(self.population_size):
             self.chromosome_2_variables(self.parent_population[i])
