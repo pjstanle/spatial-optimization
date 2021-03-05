@@ -115,9 +115,9 @@ if __name__=="__main__":
     turbine_x, turbine_y = read_aep_file(start_filename)
 
     if objective == "coe":
-        save_filename = "coe/turbine%s_setback%s.txt"%(turbine,setback_mult)
+        save_filename = "coe_realistic/turbine%s_setback%s.txt"%(turbine,setback_mult)
     elif objective == "profit":
-        save_filename = "profit/turbine%s_setback%s_ppa%s.txt"%(turbine,setback_mult,ppa_mult)
+        save_filename = "profit_realistic/turbine%s_setback%s_ppa%s.txt"%(turbine,setback_mult,ppa_mult)
     
     if turbine==1:
         powercurve_filename = 'turbine_data/low_2_43r_116d_88h.txt'
@@ -125,7 +125,8 @@ if __name__=="__main__":
         hub_height = 88.0
         turbine_rating = 2.430
 
-        capex_cost = np.array([2*1727.0,1727.0,1594.0,1517.0,1490.0,1470.0,1430.0,1420.0]) # $/kW
+        # capex_cost = np.array([2*1727.0,1727.0,1594.0,1517.0,1490.0,1470.0,1430.0,1420.0]) # $/kW ATB
+        capex_cost = np.array([2*1786.0,1786.0,1622.0,1528.0,1494.0,1470.0,1421.0,1408.0]) # $/kW realistic
         capex_size = np.array([1.0,20.0,50.0,100.0,150.0,200.0,400.0,1000.0]) # MW
         cost = capex_size*capex_cost*1000.0
         capex_function = scipy.interpolate.interp1d(capex_size, cost, kind='cubic')
@@ -137,7 +138,8 @@ if __name__=="__main__":
         hub_height = 120.0
         turbine_rating = 5.5
 
-        capex_cost = np.array([2*1438.0,1438.0,1316.0,1244.0,1199.0,1173.0,1133.0,1124.0]) # $/kW
+        # capex_cost = np.array([2*1438.0,1438.0,1316.0,1244.0,1199.0,1173.0,1133.0,1124.0]) # $/kW ATB
+        capex_cost = np.array([2*1599.0,1599.0,1421.0,1316.0,1250.0,1212.0,1153.0,1141.0]) # $/kW realistic
         capex_size = np.array([1.0,20.0,50.0,100.0,150.0,200.0,400.0,1000.0]) # MW
         cost = capex_size*capex_cost*1000.0
         capex_function = scipy.interpolate.interp1d(capex_size, cost, kind='cubic')
@@ -149,7 +151,8 @@ if __name__=="__main__":
         hub_height = 135.0
         turbine_rating = 7.0
 
-        capex_cost = np.array([2*1072.0,1072.0,970.0,908.0,877.0,862.0,840.0,829]) # $/kW
+        # capex_cost = np.array([2*1072.0,1072.0,970.0,908.0,877.0,862.0,840.0,829]) # $/kW ATB
+        capex_cost = np.array([2*1382.0,1382.0,1124.0,966.0,887.0,849.0,792.0,765.0]) # $/kW realistic
         capex_size = np.array([1.0,20.0,50.0,100.0,150.0,200.0,400.0,1000.0]) # MW
         cost = capex_size*capex_cost*1000.0
         capex_function = scipy.interpolate.interp1d(capex_size, cost, kind='cubic')
