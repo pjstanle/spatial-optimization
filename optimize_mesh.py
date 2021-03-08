@@ -320,20 +320,6 @@ def calc_spacing(layout_x,layout_y):
     return spacing
 
 
-def calc_boundary(layout_x,layout_y):
-    global boundary_poly
-    meets_constraints = True
-    for i in range(len(layout_x)):
-        point = Point(layout_x[i], layout_y[i])
-        if (boundary_poly.contains(point)==True or boundary_poly.touches(point)==True):
-            pass
-        else: 
-            meets_constraints = False
-            break
-    
-    return meets_constraints
-
-
 def AEP_obj(x):
 
     # calculate the wind farm AEP as a function of the grid design variables
@@ -361,7 +347,6 @@ def AEP_obj(x):
 
     nturbs = len(layout_x)
 
-    # meets_boundary_constraint = calc_boundary(new_x,new_y)
     # check if there are too many turbines
     if nturbs > max_turbs:
         return 1E16
@@ -370,11 +355,6 @@ def AEP_obj(x):
     elif nturbs == 0:
         return 1E16
 
-    # elif meets_boundary_constraint == False:
-    #     return 1E16
-
-    # check the boundary constraint
-    
     else:
         # check spacing constraint
         if len(layout_x) > 1:
@@ -418,89 +398,6 @@ def AEP_obj(x):
             return -aep/scale
 
 
-def COE_obj(x):
-    # calculate the wind farm COE as a function of the grid design variables
-
-    global turbine_x
-    global turbine_y
-    global plant
-
-    global min_spacing
-    global max_turbs
-    global rotor_diameter
-    global scale
-    global progress_filename
-    global function_calls
-
-    global iter_number
-    global nzones
-
-    global capex_function
-    global om_function
-    global fcr
-    global turbine_rating
-    global additional_losses
-
-    new_x, new_y = place_turbines(x)
-    
-    layout_x = np.append(turbine_x,new_x)
-    layout_y = np.append(turbine_y,new_y)
-
-    nturbs = len(layout_x)
-
-    # check if there are too many turbines
-    if nturbs > max_turbs:
-        return 1E16
-
-    # check if there are zero turbines
-    elif nturbs == 0:
-        return 1E16
-    
-    else:
-        # check spacing constraint
-        if len(layout_x) > 1:
-            spacing = calc_spacing(layout_x,layout_y)
-            spacing_con = np.min(spacing) - min_spacing*rotor_diameter
-        else:
-            spacing_con = 0.0
-
-        # if spacing constraint is violated
-        if spacing_con < 0.0:
-            return 1E16
-        
-        # if spacing constraint is not violated
-        else:
-            function_calls += 1
-            plant.modify_coordinates(layout_x,layout_y)
-            plant.simulate(1)
-            aep = plant.annual_energy_kw()
-
-            capacity = nturbs*turbine_rating
-            annual_cost = fcr*capex_function(capacity) + om_function(capacity)
-            coe = annual_cost/((1-additional_losses)*aep/1000.0) # $/MWh
-
-            if progress_filename:
-                if os.path.exists('%s'%progress_filename):
-                    with open('%s'%progress_filename) as progress_file:
-                        progress = progress_file.readlines()
-                    best_sol = float(progress[0])
-                else:
-                    best_sol = 1E20
-
-                if coe < best_sol:
-                        file = open('%s'%progress_filename, 'w')
-                        file.write('%s'%coe + '\n' + '\n')
-                        file.write("COE: " + '%s'%coe + '\n' + '\n')
-                        file.write("turbine_x = np." + '%s'%repr(layout_x) + '\n' + '\n')
-                        file.write("turbine_y = np." + '%s'%repr(layout_y) + '\n' + '\n')
-
-                        file.write("nturbs = " + '%s'%nturbs + '\n')
-                        file.write("zone " + '%s/%s'%(iter_number,nzones) + '\n')
-                        file.close()
-
-            return coe    
-
-
 if __name__=="__main__":
 
     global turbine_x
@@ -520,11 +417,6 @@ if __name__=="__main__":
     global iter_number
     global nzones
 
-    global capex_function
-    global om_function
-    global fcr
-    global turbine_rating
-    global additional_losses
     global turbs_per_zone
 
     global nrows
@@ -532,18 +424,12 @@ if __name__=="__main__":
 
     # THESE SHOULD BE THE ONLY THINGS YOU NEED TO CHANGE BETWEEN RUNS
 
-    turbine = 2
-    setback_mult = 2.0
-    # run_number = 1
-    objective = "aep"
+    turbine = int(sys.argv[1]) # 1: low 2: meduim 3: high
+    setback_mult = float(sys.argv[2]) # float
+    run_number = int(sys.argv[3])
+    objective = str(sys.argv[4])
 
     debug = False
-    # try:
-    #     print("try")
-    #     debug = bool(float(sys.argv[5]))
-    # except IndexError:
-    #     print("except")
-    #     debug = False
 
     # 0 INITIALIZE GLOBAL VARIABLES
     turbine_x = np.array([])
@@ -553,41 +439,18 @@ if __name__=="__main__":
         powercurve_filename = 'turbine_data/low_2_43r_116d_88h.txt'
         rotor_diameter = 116.0
         hub_height = 88.0
-        turbine_rating = 2.430
-
-        capex_cost = np.array([2*1727.0,1727.0,1594.0,1517.0,1490.0,1470.0,1430.0,1420.0]) # $/kW
-        capex_size = np.array([1.0,20.0,50.0,100.0,150.0,200.0,400.0,1000.0]) # MW
-        cost = capex_size*capex_cost*1000.0
-        capex_function = scipy.interpolate.interp1d(capex_size, cost, kind='cubic')
 
     elif turbine==2:
         powercurve_filename = 'turbine_data/med_5_5r_175d_120h.txt'
         rotor_diameter = 175.0
         hub_height = 120.0
-        turbine_rating = 5.5
-
-        capex_cost = np.array([2*1438.0,1438.0,1316.0,1244.0,1199.0,1173.0,1133.0,1124.0]) # $/kW
-        capex_size = np.array([1.0,20.0,50.0,100.0,150.0,200.0,400.0,1000.0]) # MW
-        cost = capex_size*capex_cost*1000.0
-        capex_function = scipy.interpolate.interp1d(capex_size, cost, kind='cubic')
 
     elif turbine==3:
         powercurve_filename = 'turbine_data/high_7r_200d_135h.txt'
         rotor_diameter = 200.0
         hub_height = 135.0
-        turbine_rating = 7.0
 
-        capex_cost = np.array([2*1072.0,1072.0,970.0,908.0,877.0,862.0,840.0,829]) # $/kW
-        capex_size = np.array([1.0,20.0,50.0,100.0,150.0,200.0,400.0,1000.0]) # MW
-        cost = capex_size*capex_cost*1000.0
-        capex_function = scipy.interpolate.interp1d(capex_size, cost, kind='cubic')
-
-    additional_losses = 0.088
-    fcr = 0.063
     
-    def om_function(capacity):
-        return 37.0*capacity*1000.0
-
     plant = init_wind_plant(hub_height,rotor_diameter,powercurve_filename)
     tip_height = hub_height+rotor_diameter/2.0
     buffer_distance = setback_mult*tip_height
@@ -601,17 +464,13 @@ if __name__=="__main__":
     else:
         os.mkdir(objective)
         
-    # progress_filename = "debug.txt"
-    # figname = "debug.png"
     if debug == True:
-        progress_filename = "debug1.txt"
+        progress_filename = "debug.txt"
         if os.path.exists('%s'%progress_filename):
             os.remove(('%s'%progress_filename))
         
-        # figname = "debug.png"
     else:
-        progress_filename = "%s/turbine%s_setback%s_mesh.txt"%(objective,turbine,setback_mult)
-        # figname = "%s/turbine%s_setback%s_mesh.png"%(objective,turbine,setback_mult)
+        progress_filename = "%s/turbine%s_setback%s_mesh_run%s.txt"%(objective,turbine,setback_mult,run_number)
 
     function_calls = 0
 
@@ -676,13 +535,13 @@ if __name__=="__main__":
 
     start_time = time.time()
 
-    # if debug == True:
-    #     iters = 3
-    # else:
-    #     iters = nzones
-    iters = nzones
+    if debug == True:
+        iters = 3
+    else:
+        iters = nzones
 
     turbs_per_zone = np.zeros(nzones,dtype=int)
+
     for i in range(iters):
         iter_number = i+1
 
@@ -703,8 +562,12 @@ if __name__=="__main__":
         ga.bounds = bounds
         ga.variable_type = variable_type
         
-        ga.population_size = 100
-        ga.convergence_iters = 20 # number of iterations within the tolerance required for convergence
+        if debug == True:
+            ga.population_size = 25
+            ga.convergence_iters = 10 # number of iterations within the tolerance required for convergence
+        else:
+            ga.population_size = 100
+            ga.convergence_iters = 20 # number of iterations within the tolerance required for convergence
         ga.max_generation = 1000 # maximum generations. Eveything I have run has converged in a couple of hundered
 
         if objective == "aep":
@@ -723,20 +586,10 @@ if __name__=="__main__":
             opt_val = -ga.optimized_function_value
             DVopt = ga.optimized_design_variables
             if opt_val > 0.0:
-                # sweep through greedily
-                # sol, arr = second_sweep(AEP_obj,nrows,ncols,start=DVopt)
                 opt_x, opt_y = place_turbines(DVopt) 
                 turbine_x = np.append(turbine_x,opt_x)
                 turbine_y = np.append(turbine_y,opt_y)
         
-        elif objective == "coe":
-            opt_val = ga.optimized_function_value
-            DVopt = ga.optimized_design_variables
-            if opt_val < 1E3:
-                opt_x, opt_y = place_turbines(DVopt) 
-                turbine_x = np.append(turbine_x,opt_x)
-                turbine_y = np.append(turbine_y,opt_y)
-
     
     run_time = time.time() - start_time
     print("opt_val: ", opt_val)
@@ -747,13 +600,14 @@ if __name__=="__main__":
     print("yf: ", repr(turbine_y))
     print("nturbs: ", len(turbine_x))
 
-    # if figname:
-    #     for i in range(len(polys)):
-    #         plot_poly(polys[i],plt.gca())
-    #     for i in range(len(turbine_x)):
-    #         turb = plt.Circle((turbine_x[i],turbine_y[i]),radius=rotor_diameter/2.0,edgecolor=None,facecolor="C0")
-    #         plt.gca().add_patch(turb)
+    file = open('%s'%progress_filename, 'w')
+    file.write('%s'%(-opt_val) + '\n' + '\n')
+    file.write("AEP: " + '%s'%(opt_val) + '\n' + '\n')
+    file.write("turbine_x = np." + '%s'%repr(turbine_x) + '\n' + '\n')
+    file.write("turbine_y = np." + '%s'%repr(turbine_y) + '\n' + '\n')
 
-    #     plt.axis("equal")
-    #     plt.savefig(figname,dpi=300)
-    #     plt.show()
+    file.write("nturbs = " + '%s'%len(turbine_x) + '\n')
+    file.write("turbs_per_zone = " + '%s'%turbs_per_zone  + '\n')
+    file.write("zone " + '%s/%s'%(iter_number,nzones) + '\n')
+    file.write("CONVERGED")
+    file.close()
