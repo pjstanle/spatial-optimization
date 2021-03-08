@@ -102,12 +102,9 @@ def read_aep_file(filename):
 
 if __name__=="__main__":
 
-    # THESE SHOULD BE THE ONLY THINGS YOU NEED TO CHANGE BETWEEN RUNS
-
-    objs = np.array(["aep","coe","profit"])
+    objs = np.array(["aep","coe","profit 1.01","profit 1.05","profit 1.1","profit 1.2"])
     turbs = np.array([1,2,3],dtype=int)
     mults = np.array([0.0,1.1,2.0,3.0])
-    ppa_mult_arr = np.array([1.01,1.05,1.1,1.2])
 
     # objs = np.array(["coe","profit"])
     # turbs = np.array([3],dtype=int)
@@ -117,32 +114,33 @@ if __name__=="__main__":
     objective = np.array([])
     turbine = np.array([],dtype=int)
     setback_mult = np.array([])
-    ppa_mult = np.array([])
     for i in range(len(objs)):
         for j in range(len(turbs)):
             for k in range(len(mults)):
-                for m in range(len(ppa_mult_arr)):
-                    objective = np.append(objective,objs[i])
-                    turbine = np.append(turbine,turbs[j])
-                    setback_mult = np.append(setback_mult,mults[k])
-                    ppa_mult = np.append(ppa_mult,ppa_mult_arr[m])
+                objective = np.append(objective,objs[i])
+                turbine = np.append(turbine,turbs[j])
+                setback_mult = np.append(setback_mult,mults[k])
 
     nruns = len(objective)
     nturbs = np.zeros(nruns)
     capacity = np.zeros(nruns)
     aep = np.zeros(nruns)
+    wake_loss = np.zeros(nruns)
     aep_w_losses = np.zeros(nruns)
     annual_cost = np.zeros(nruns)
-    annual_income = np.zeros(nruns)
     coe = np.zeros(nruns)
-    profit = np.zeros(nruns)
+    annual_income101 = np.zeros(nruns)
+    annual_income105 = np.zeros(nruns)
+    annual_income11 = np.zeros(nruns)
+    annual_income12 = np.zeros(nruns)
+    profit101 = np.zeros(nruns)
+    profit105 = np.zeros(nruns)
+    profit11 = np.zeros(nruns)
+    profit12 = np.zeros(nruns)
     total_area = np.zeros(nruns)
     safe_area = np.zeros(nruns)
     total_cap_density = np.zeros(nruns)
     safe_cap_density = np.zeros(nruns)
-    ppa = np.zeros(nruns)
-
-    
 
     for i in range(nruns):
         print("%s/%s"%(i+1,nruns))
@@ -150,8 +148,14 @@ if __name__=="__main__":
 
         if objective[i] == "aep" or objective[i] == "coe":
             filename = "%s/turbine%s_setback%s.txt"%(objective[i],turbine[i],setback_mult[i])
-        elif objective[i] == "profit":
-            filename = "%s/turbine%s_setback%s_ppa%s.txt"%(objective[i],turbine[i],setback_mult[i],ppa_mult[i])
+        elif objective[i] == "profit 1.01":
+            filename = "profit/turbine%s_setback%s_ppa1.01.txt"%(turbine[i],setback_mult[i])
+        elif objective[i] == "profit 1.05":
+            filename = "profit/turbine%s_setback%s_ppa1.05.txt"%(turbine[i],setback_mult[i])
+        elif objective[i] == "profit 1.1":
+            filename = "profit/turbine%s_setback%s_ppa1.1.txt"%(turbine[i],setback_mult[i])
+        elif objective[i] == "profit 1.2":
+            filename = "profit/turbine%s_setback%s_ppa1.2.txt"%(turbine[i],setback_mult[i])
         turbine_x, turbine_y = read_aep_file(filename)
 
 
@@ -165,7 +169,8 @@ if __name__=="__main__":
             capex_size = np.array([1.0,20.0,50.0,100.0,150.0,200.0,400.0,1000.0]) # MW
             cost = capex_size*capex_cost*1000.0
             capex_function = scipy.interpolate.interp1d(capex_size, cost, kind='cubic')
-            ppa[i] = 46.56550870915244*ppa_mult[i]
+            ppa_const = 46.56550870915244
+            aep_ideal = 7.783777422
 
         elif turbine[i]==2:
             powercurve_filename = 'turbine_data/med_5_5r_175d_120h.txt'
@@ -177,7 +182,8 @@ if __name__=="__main__":
             capex_size = np.array([1.0,20.0,50.0,100.0,150.0,200.0,400.0,1000.0]) # MW
             cost = capex_size*capex_cost*1000.0
             capex_function = scipy.interpolate.interp1d(capex_size, cost, kind='cubic')
-            ppa[i] = 35.371107013888526*ppa_mult[i]
+            ppa_const = 35.371107013888526
+            aep_ideal = 19.61536888
 
         elif turbine[i]==3:
             powercurve_filename = 'turbine_data/high_7r_200d_135h.txt'
@@ -189,7 +195,8 @@ if __name__=="__main__":
             capex_size = np.array([1.0,20.0,50.0,100.0,150.0,200.0,400.0,1000.0]) # MW
             cost = capex_size*capex_cost*1000.0
             capex_function = scipy.interpolate.interp1d(capex_size, cost, kind='cubic')
-            ppa[i] = 27.515987098794344*ppa_mult[i]
+            ppa_const = 27.515987098794344
+            aep_ideal = 26.15991737
 
         additional_losses = 0.088
         fcr = 0.063
@@ -260,15 +267,24 @@ if __name__=="__main__":
         plant.modify_coordinates(turbine_x,turbine_y)
         plant.simulate(1)
         aep[i] = plant.annual_energy_kw()/scale
+        wake_loss[i] = 100.0*(aep_ideal*nturbs[i]-aep[i]/1E3)/(aep_ideal*nturbs[i])
         aep_w_losses[i] = (1-additional_losses)*aep[i]
         capacity[i] = nturbs[i]*turbine_rating
         annual_cost[i] = fcr*capex_function(capacity[i]) + om_function(capacity[i])
-        annual_income[i] = aep_w_losses[i]*ppa[i]
         coe[i] = annual_cost[i]/((1-additional_losses)*aep[i]) # $/MWh
-        profit[i] = (annual_income[i] - annual_cost[i])
 
+        annual_income101[i] = aep_w_losses[i]*ppa_const*1.01
+        profit101[i] = (annual_income101[i] - annual_cost[i])
 
-        
+        annual_income105[i] = aep_w_losses[i]*ppa_const*1.05
+        profit105[i] = (annual_income105[i] - annual_cost[i])
+
+        annual_income11[i] = aep_w_losses[i]*ppa_const*1.1
+        profit11[i] = (annual_income11[i] - annual_cost[i])
+
+        annual_income12[i] = aep_w_losses[i]*ppa_const*1.2
+        profit12[i] = (annual_income12[i] - annual_cost[i])
+
         total_cap_density[i] = capacity[i]/(total_area[i])
         safe_cap_density[i] = capacity[i]/(safe_area[i])
 
@@ -283,15 +299,17 @@ if __name__=="__main__":
 
 
 
-    output_data = pd.DataFrame([objective,turbine,setback_mult,ppa_mult,nturbs,capacity,aep/1E3,aep_w_losses/1E3,annual_cost/1E6,annual_income/1E6,
-            coe,total_area,safe_area,total_cap_density,safe_cap_density,ppa,profit/1E6],['Objective','Turbine Type',
-            'Setback Tip Height Multiplier','PPA Multiplier','Number of Turbines',
-            'Total Capacity (MW)','AEP (GWh)','AEP with Losses (GWh)','Annual Cost ($MM)','Annual Income ($MM)','COE ($/MWh)','Boundary Area (km^2)','Available Area (km^2)',
-            'Boundary Capacity Density (MW/km^2)','Available Capactiy Density (MW/km^2)','PPA ($/MWh)','Profit ($MM)'])
+    output_data = pd.DataFrame([objective,turbine,setback_mult,nturbs,capacity,aep/1E3,wake_loss,aep_w_losses/1E3,annual_cost/1E6,
+            coe,total_area,safe_area,total_cap_density,safe_cap_density,annual_income101/1E6,annual_income105/1E6,annual_income11/1E6,annual_income12/1E6,
+            profit101/1E6,profit105/1E6,profit11/1E6,profit12/1E6],['Objective','Turbine Type',
+            'Setback Tip Height Multiplier','Number of Turbines',
+            'Total Capacity (MW)','AEP (GWh)','Wake Loss (%)','AEP with Losses (GWh)','Annual Cost ($MM)','COE ($/MWh)','Boundary Area (km^2)','Available Area (km^2)',
+            'Boundary Capacity Density (MW/km^2)','Available Capactiy Density (MW/km^2)','Annual Income 1.01 ($MM)','Annual Income 1.05($MM)','Annual Income 1.1 ($MM)','Annual Income 1.2 ($MM)',
+            'Profit 1.01 ($MM)','Profit 1.05 ($MM)','Profit 1.1 ($MM)','Profit 1.2 ($MM)'])
     
 
     transposed = output_data.transpose()
-    transposed.to_csv("full_data.csv")
+    transposed.to_csv("full_data2.csv")
 
     # print("objective: ", objective)
     # print("turbine: ", turbine)

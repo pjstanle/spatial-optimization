@@ -103,21 +103,27 @@ if __name__=="__main__":
 
     # THESE SHOULD BE THE ONLY THINGS YOU NEED TO CHANGE BETWEEN RUNS
 
-    turbine = int(sys.argv[1]) # 1: low 2: meduim 3: high
-    setback_mult = float(sys.argv[2]) # float
-    objective = sys.argv[3] # coe or profit
-    try:
-        ppa_mult = float(sys.argv[4])
-    except:
-        ppa_mult = 0.0
+    # turbine = int(sys.argv[1]) # 1: low 2: meduim 3: high
+    # setback_mult = float(sys.argv[2]) # float
+    # objective = sys.argv[3] # coe or profit
+    # try:
+    #     ppa_mult = float(sys.argv[4])
+    # except:
+    #     ppa_mult = 0.0
+    turbine = 1
+    setback_mult = 3.0
+    objective = "coe"
+    ppa_mult = 0.0
 
-    start_filename = "aep/turbine%s_setback%s.txt"%(turbine,setback_mult)
+    # start_filename = "aep/turbine%s_setback%s.txt"%(turbine,setback_mult)
+    start_filename = "debug.txt"
     turbine_x, turbine_y = read_aep_file(start_filename)
 
-    if objective == "coe":
-        save_filename = "coe/turbine%s_setback%s.txt"%(turbine,setback_mult)
-    elif objective == "profit":
-        save_filename = "profit/turbine%s_setback%s_ppa%s.txt"%(turbine,setback_mult,ppa_mult)
+    save_filename = "debug1.txt"
+    # if objective == "coe":
+    #     save_filename = "coe/turbine%s_setback%s.txt"%(turbine,setback_mult)
+    # elif objective == "profit":
+    #     save_filename = "profit/turbine%s_setback%s_ppa%s.txt"%(turbine,setback_mult,ppa_mult)
     
     if turbine==1:
         powercurve_filename = 'turbine_data/low_2_43r_116d_88h.txt'
