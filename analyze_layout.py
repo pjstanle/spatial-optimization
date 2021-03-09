@@ -152,6 +152,7 @@ if __name__=="__main__":
             filename = "%s/turbine%s_setback%s.txt"%(objective[i],turbine[i],setback_mult[i])
         elif objective[i] == "profit":
             filename = "%s/turbine%s_setback%s_ppa%s.txt"%(objective[i],turbine[i],setback_mult[i],ppa_mult[i])
+            
         turbine_x, turbine_y = read_aep_file(filename)
 
 

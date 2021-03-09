@@ -214,7 +214,7 @@ def mesh_poly(poly,rotor_diameter):
     top = max(y)-cy
     bot = cy-min(y)
 
-    N = 1
+    N = 2
     nleft = int(left/(N*rotor_diameter))+2
     nright = int(right/(N*rotor_diameter))+2
     ntop = int(top/(N*rotor_diameter))+2
