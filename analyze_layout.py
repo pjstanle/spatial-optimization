@@ -50,15 +50,19 @@ def read_aep_file(filename):
                     n1 = ""
                     read = False
                     for i in range(len(chars)):
+                        if chars[i] == "]":
+                            read = False
+                            y = True
                         if read == True:
                             n1 = n1+chars[i]
                         if chars[i] == "[":
                             read = True
+                        
                     turbine_x = np.array([float(n1)])
                     x = True
                 
                     for i in range(len(row)-1):
-                        if row[i+1] != "":
+                        if row[i+1] != "" and row[i+1] != "]":
                             turbine_x = np.append(turbine_x,float(row[i+1]))
 
                 
@@ -85,10 +89,14 @@ def read_aep_file(filename):
                     n1 = ""
                     read = False
                     for i in range(len(chars)):
+                        if chars[i] == "]":
+                            read = False
+                            y = False
                         if read == True:
                             n1 = n1+chars[i]
                         if chars[i] == "[":
                             read = True
+                        
                     turbine_y = np.array([float(n1)])
                     x = False
                 
@@ -144,18 +152,22 @@ if __name__=="__main__":
 
     for i in range(nruns):
         print("%s/%s"%(i+1,nruns))
+        print("turbine: ", turbine[i])
+        print("setback: ", setback_mult[i])
+        print("objective: ", objective[i])
 
-
-        if objective[i] == "aep" or objective[i] == "coe":
-            filename = "%s/turbine%s_setback%s.txt"%(objective[i],turbine[i],setback_mult[i])
+        if objective[i] == "aep":
+            filename = "aep_mesh/turbine%s_setback%s.txt"%(turbine[i],setback_mult[i])
+        elif objective[i] == "coe":
+            filename = "coe_ATB_mesh/turbine%s_setback%s.txt"%(turbine[i],setback_mult[i])
         elif objective[i] == "profit 1.01":
-            filename = "profit/turbine%s_setback%s_ppa1.01.txt"%(turbine[i],setback_mult[i])
+            filename = "profit_ATB_mesh/turbine%s_setback%s_ppa1.01.txt"%(turbine[i],setback_mult[i])
         elif objective[i] == "profit 1.05":
-            filename = "profit/turbine%s_setback%s_ppa1.05.txt"%(turbine[i],setback_mult[i])
+            filename = "profit_ATB_mesh/turbine%s_setback%s_ppa1.05.txt"%(turbine[i],setback_mult[i])
         elif objective[i] == "profit 1.1":
-            filename = "profit/turbine%s_setback%s_ppa1.1.txt"%(turbine[i],setback_mult[i])
+            filename = "profit_ATB_mesh/turbine%s_setback%s_ppa1.1.txt"%(turbine[i],setback_mult[i])
         elif objective[i] == "profit 1.2":
-            filename = "profit/turbine%s_setback%s_ppa1.2.txt"%(turbine[i],setback_mult[i])
+            filename = "profit_ATB_mesh/turbine%s_setback%s_ppa1.2.txt"%(turbine[i],setback_mult[i])
         turbine_x, turbine_y = read_aep_file(filename)
 
 
@@ -309,7 +321,7 @@ if __name__=="__main__":
     
 
     transposed = output_data.transpose()
-    transposed.to_csv("full_data2.csv")
+    transposed.to_csv("full_data_ATB_mesh.csv")
 
     # print("objective: ", objective)
     # print("turbine: ", turbine)

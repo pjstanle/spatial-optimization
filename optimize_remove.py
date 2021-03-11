@@ -119,18 +119,10 @@ if __name__=="__main__":
     start_filename = "debug.txt"
     turbine_x, turbine_y = read_aep_file(start_filename)
 
-<<<<<<< HEAD
-    save_filename = "debug1.txt"
-    # if objective == "coe":
-    #     save_filename = "coe/turbine%s_setback%s.txt"%(turbine,setback_mult)
-    # elif objective == "profit":
-    #     save_filename = "profit/turbine%s_setback%s_ppa%s.txt"%(turbine,setback_mult,ppa_mult)
-=======
     if objective == "coe":
         save_filename = "coe_realistic/turbine%s_setback%s.txt"%(turbine,setback_mult)
     elif objective == "profit":
         save_filename = "profit_realistic/turbine%s_setback%s_ppa%s.txt"%(turbine,setback_mult,ppa_mult)
->>>>>>> 3fc30c55d1a8c05edda1da882e60a4ca02124d44
     
     if turbine==1:
         powercurve_filename = 'turbine_data/low_2_43r_116d_88h.txt'
