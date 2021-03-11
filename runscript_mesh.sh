@@ -12,5 +12,5 @@ cd /home/pjstanle/spatial-optimization
 
 conda activate spatial
 
-python optimize_mesh.py 3 1.1 3 aep
+python optimize_mesh.py 1 1.1 3 aep
 # python optimize_remove.py $1 $2 $3 $4

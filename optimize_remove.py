@@ -103,24 +103,19 @@ if __name__=="__main__":
 
     # THESE SHOULD BE THE ONLY THINGS YOU NEED TO CHANGE BETWEEN RUNS
 
-    # turbine = int(sys.argv[1]) # 1: low 2: meduim 3: high
-    # setback_mult = float(sys.argv[2]) # float
-    # objective = sys.argv[3] # coe or profit
-    # try:
-    #     ppa_mult = float(sys.argv[4])
-    # except:
-    #     ppa_mult = 0.0
-    turbine = 1
-    setback_mult = 3.0
-    objective = "coe"
-    ppa_mult = 0.0
+    turbine = int(sys.argv[1]) # 1: low 2: meduim 3: high
+    setback_mult = float(sys.argv[2]) # float
+    objective = sys.argv[3] # coe or profit
+    try:
+        ppa_mult = float(sys.argv[4])
+    except:
+        ppa_mult = 0.0
 
-    # start_filename = "aep/turbine%s_setback%s.txt"%(turbine,setback_mult)
-    start_filename = "debug.txt"
+    start_filename = "aep_mesh/turbine%s_setback%s.txt"%(turbine,setback_mult)
     turbine_x, turbine_y = read_aep_file(start_filename)
 
     if objective == "coe":
-        save_filename = "coe_realistic/turbine%s_setback%s.txt"%(turbine,setback_mult)
+        save_filename = "coe_ATB_mesh/turbine%s_setback%s.txt"%(turbine,setback_mult)
     elif objective == "profit":
         save_filename = "profit_realistic/turbine%s_setback%s_ppa%s.txt"%(turbine,setback_mult,ppa_mult)
     
@@ -130,8 +125,8 @@ if __name__=="__main__":
         hub_height = 88.0
         turbine_rating = 2.430
 
-        # capex_cost = np.array([2*1727.0,1727.0,1594.0,1517.0,1490.0,1470.0,1430.0,1420.0]) # $/kW ATB
-        capex_cost = np.array([2*1786.0,1786.0,1622.0,1528.0,1494.0,1470.0,1421.0,1408.0]) # $/kW realistic
+        capex_cost = np.array([2*1727.0,1727.0,1594.0,1517.0,1490.0,1470.0,1430.0,1420.0]) # $/kW ATB
+        # capex_cost = np.array([2*1786.0,1786.0,1622.0,1528.0,1494.0,1470.0,1421.0,1408.0]) # $/kW realistic
         capex_size = np.array([1.0,20.0,50.0,100.0,150.0,200.0,400.0,1000.0]) # MW
         cost = capex_size*capex_cost*1000.0
         capex_function = scipy.interpolate.interp1d(capex_size, cost, kind='cubic')
@@ -143,8 +138,8 @@ if __name__=="__main__":
         hub_height = 120.0
         turbine_rating = 5.5
 
-        # capex_cost = np.array([2*1438.0,1438.0,1316.0,1244.0,1199.0,1173.0,1133.0,1124.0]) # $/kW ATB
-        capex_cost = np.array([2*1599.0,1599.0,1421.0,1316.0,1250.0,1212.0,1153.0,1141.0]) # $/kW realistic
+        capex_cost = np.array([2*1438.0,1438.0,1316.0,1244.0,1199.0,1173.0,1133.0,1124.0]) # $/kW ATB
+        # capex_cost = np.array([2*1599.0,1599.0,1421.0,1316.0,1250.0,1212.0,1153.0,1141.0]) # $/kW realistic
         capex_size = np.array([1.0,20.0,50.0,100.0,150.0,200.0,400.0,1000.0]) # MW
         cost = capex_size*capex_cost*1000.0
         capex_function = scipy.interpolate.interp1d(capex_size, cost, kind='cubic')
@@ -156,8 +151,8 @@ if __name__=="__main__":
         hub_height = 135.0
         turbine_rating = 7.0
 
-        # capex_cost = np.array([2*1072.0,1072.0,970.0,908.0,877.0,862.0,840.0,829]) # $/kW ATB
-        capex_cost = np.array([2*1382.0,1382.0,1124.0,966.0,887.0,849.0,792.0,765.0]) # $/kW realistic
+        capex_cost = np.array([2*1072.0,1072.0,970.0,908.0,877.0,862.0,840.0,829]) # $/kW ATB
+        # capex_cost = np.array([2*1382.0,1382.0,1124.0,966.0,887.0,849.0,792.0,765.0]) # $/kW realistic
         capex_size = np.array([1.0,20.0,50.0,100.0,150.0,200.0,400.0,1000.0]) # MW
         cost = capex_size*capex_cost*1000.0
         capex_function = scipy.interpolate.interp1d(capex_size, cost, kind='cubic')
@@ -212,10 +207,12 @@ if __name__=="__main__":
                 obj = coe
             elif objective == "profit":
                 profit = (((1-additional_losses)*aep/1000.0)*ppa - annual_cost)/1E6 # millions of dollars
+                # print(profit)
                 obj = -profit
 
             if obj < best_sol:
                 best_sol = obj
+                # print(best_sol)
                 best_x = np.zeros_like(temp_x)
                 best_y = np.zeros_like(temp_y)
                 best_x[:] = temp_x[:]
@@ -234,6 +231,7 @@ if __name__=="__main__":
         if best_sol == last_sol:
             converged = True
         else:
+            print(best_sol)
             turbine_x = best_x
             turbine_y = best_y
 
