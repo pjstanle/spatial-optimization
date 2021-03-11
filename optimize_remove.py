@@ -118,6 +118,7 @@ if __name__=="__main__":
         save_filename = "coe_ATB_mesh/turbine%s_setback%s.txt"%(turbine,setback_mult)
     elif objective == "profit":
         save_filename = "profit_ATB_mesh/turbine%s_setback%s_ppa%s.txt"%(turbine,setback_mult,ppa_mult)
+        # save_filename = "profit_realistic/turbine%s_setback%s_ppa%s.txt"%(turbine,setback_mult,ppa_mult)
     
     if turbine==1:
         powercurve_filename = 'turbine_data/low_2_43r_116d_88h.txt'

@@ -441,8 +441,15 @@ if __name__=="__main__":
     
     # 2 LOOP THROUGH EACH SAFE AREA AND OPTIMIZE
     nzones = len(polys)
-    order = np.arange(nzones)
-    np.random.shuffle(order)
+    # order = np.arange(nzones)
+    # np.random.shuffle(order)
+
+    areas = np.zeros(nzones)
+    for i in range(nzones):
+        boundary_poly = polys[i]
+        areas[i] = boundary_poly.area
+    order = np.argsort(areas)
+    # order = np.flip(order)
 
     start_time = time.time()
 
