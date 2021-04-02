@@ -111,6 +111,7 @@ def read_aep_file(filename):
 if __name__=="__main__":
 
     objs = np.array(["aep","coe","profit 1.01","profit 1.05","profit 1.1","profit 1.2"])
+    # objs = np.array(["aep"])
     turbs = np.array([1,2,3],dtype=int)
     mults = np.array([0.0,1.1,2.0,3.0])
 
@@ -150,6 +151,7 @@ if __name__=="__main__":
     total_cap_density = np.zeros(nruns)
     safe_cap_density = np.zeros(nruns)
 
+
     for i in range(nruns):
         print("%s/%s"%(i+1,nruns))
         print("turbine: ", turbine[i])
@@ -157,17 +159,17 @@ if __name__=="__main__":
         print("objective: ", objective[i])
 
         if objective[i] == "aep":
-            filename = "aep_mesh/turbine%s_setback%s.txt"%(turbine[i],setback_mult[i])
+            filename = "aep_spacing/turbine%s_setback%s.txt"%(turbine[i],setback_mult[i])
         elif objective[i] == "coe":
-            filename = "coe_ATB_mesh/turbine%s_setback%s.txt"%(turbine[i],setback_mult[i])
+            filename = "coe_ATB_spacing/turbine%s_setback%s.txt"%(turbine[i],setback_mult[i])
         elif objective[i] == "profit 1.01":
-            filename = "profit_ATB_mesh/turbine%s_setback%s_ppa1.01.txt"%(turbine[i],setback_mult[i])
+            filename = "profit_ATB_spacing/turbine%s_setback%s_ppa1.01.txt"%(turbine[i],setback_mult[i])
         elif objective[i] == "profit 1.05":
-            filename = "profit_ATB_mesh/turbine%s_setback%s_ppa1.05.txt"%(turbine[i],setback_mult[i])
+            filename = "profit_ATB_spacing/turbine%s_setback%s_ppa1.05.txt"%(turbine[i],setback_mult[i])
         elif objective[i] == "profit 1.1":
-            filename = "profit_ATB_mesh/turbine%s_setback%s_ppa1.1.txt"%(turbine[i],setback_mult[i])
+            filename = "profit_ATB_spacing/turbine%s_setback%s_ppa1.1.txt"%(turbine[i],setback_mult[i])
         elif objective[i] == "profit 1.2":
-            filename = "profit_ATB_mesh/turbine%s_setback%s_ppa1.2.txt"%(turbine[i],setback_mult[i])
+            filename = "profit_ATB_spacing/turbine%s_setback%s_ppa1.2.txt"%(turbine[i],setback_mult[i])
         turbine_x, turbine_y = read_aep_file(filename)
 
 
@@ -316,12 +318,12 @@ if __name__=="__main__":
             profit101/1E6,profit105/1E6,profit11/1E6,profit12/1E6],['Objective','Turbine Type',
             'Setback Tip Height Multiplier','Number of Turbines',
             'Total Capacity (MW)','AEP (GWh)','Wake Loss (%)','AEP with Losses (GWh)','Annual Cost ($MM)','COE ($/MWh)','Boundary Area (km^2)','Available Area (km^2)',
-            'Boundary Capacity Density (MW/km^2)','Available Capactiy Density (MW/km^2)','Annual Income 1.01 ($MM)','Annual Income 1.05($MM)','Annual Income 1.1 ($MM)','Annual Income 1.2 ($MM)',
+            'Boundary Capacity Density (MW/km^2)','Available Capactiy Density (MW/km^2)','Annual Income 1.01 ($MM)','Annual Income 1.05 ($MM)','Annual Income 1.1 ($MM)','Annual Income 1.2 ($MM)',
             'Profit 1.01 ($MM)','Profit 1.05 ($MM)','Profit 1.1 ($MM)','Profit 1.2 ($MM)'])
     
 
     transposed = output_data.transpose()
-    transposed.to_csv("full_data_ATB_mesh.csv")
+    transposed.to_csv("updated_ATB_spacing.csv")
 
     # print("objective: ", objective)
     # print("turbine: ", turbine)
