@@ -7,6 +7,3 @@ turbine_x = np.array([897705.12310499])
 turbine_y = np.array([164646.43890264])
 
 nturbs = 1
-, 164646.43890264])
-
-nturbs = 2
